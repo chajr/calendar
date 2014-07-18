@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+include_once "../keys.php";
 include_once "templates/base.php";
 echo pageHeader("Simple API Access");
 
@@ -37,7 +38,7 @@ require_once 'Google/Service/Books.php';
  ************************************************/
 $client = new Google_Client();
 $client->setApplicationName("Client_Library_Examples");
-$apiKey = "<YOUR_API_KEY>";
+$apiKey = YOUR_API_KEY;
 if ($apiKey == '<YOUR_API_KEY>') {
   echo missingApiKeyWarning();
 }
