@@ -76,30 +76,7 @@ try {
     }
     
     
-    
-    
-//    
-//    var_dump($client->createAuthUrl());
-//    if (isset($_SESSION['oauth_access_token'])) {
-//        $client->setAccessToken($_SESSION['oauth_access_token']);
-//    } else {
-//        $token = $client->authenticate($_GET['code']);
-//        echo '<pre>';
-//        var_dump($token, $client->getAccessToken());
-//        echo '</pre>';
-//        $_SESSION['oauth_access_token'] = $client->getAccessToken();;
-//    }
-//    
 
-
-//    echo '<pre>';
-////    var_dump($service->calendarList);
-////    var_dump($service->calendars);
-////    var_dump(get_class_vars('Google_Service_Calendar'));
-////    var_dump($service);
-//
-//    var_dump($service->calendarList->get(CALENDAR_ID));
-//    echo '</pre>';
 
 
 } catch (Exception $e) {
