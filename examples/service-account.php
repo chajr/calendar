@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 session_start();
+include_once "../keys.php";
 include_once "templates/base.php";
 
 /************************************************
@@ -38,7 +39,7 @@ require_once 'Google/Service/Books.php';
   Make sure the Books API is enabled on this
   account as well, or the call will fail.
  ************************************************/
-$client_id = '<YOUR_CLIENT_ID>';
+$client_id = CLIENT_ID;
 $service_account_name = '';
 $key_file_location = '';
 

@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+include_once "../keys.php";
 include_once "templates/base.php";
 session_start();
 
@@ -26,9 +27,9 @@ require_once 'Google/Service/Urlshortener.php';
   the redirect URI is to this page, e.g:
   http://localhost:8080/user-example.php
  ************************************************/
- $client_id = '464399473477-btoach7db73opuff9n7r8i44f00lfkuf.apps.googleusercontent.com';
- $client_secret = '<YOUR_CLIENT_SECRET>';
- $redirect_uri = '<YOUR_REDIRECT_URI>';
+ $client_id = CLIENT_ID;
+ $client_secret = CLIENT_SECRET;
+ $redirect_uri = REDIRECT_URI;
 
 /************************************************
   Make an API request on behalf of a user. In

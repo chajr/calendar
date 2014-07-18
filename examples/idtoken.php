@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 include_once "templates/base.php";
+include_once "../keys.php";
 session_start();
 
 set_include_path("../src/" . PATH_SEPARATOR . get_include_path());
@@ -25,9 +26,9 @@ require_once 'Google/Client.php';
   the redirect URI is to this page, e.g:
   http://localhost:8080/user-example.php
  ************************************************/
-$client_id = '<YOUR_CLIENT_ID>';
-$client_secret = '<YOUR_CLIENT_SECRET>';
-$redirect_uri = '<YOUR_REDIRECT_URI>';
+$client_id = CLIENT_ID;
+$client_secret = CLIENT_SECRET;
+$redirect_uri = REDIRECT_URI;
 
 $client = new Google_Client();
 $client->setClientId($client_id);

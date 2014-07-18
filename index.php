@@ -1,3 +1,6 @@
+<?php
+ob_start();
+?>
 <!DOCTYPE html>
 <html>
     <head>
@@ -20,18 +23,20 @@
             }
             .error {
                 padding:10px;
-                width: 80%;
+                width: 90%;
                 margin: 10px auto;
                 border: 2px solid #f94949;
                 color: #d6201d;
                 text-align: center;
                 background: #efc9c9;
+                word-wrap: break-word;
             }
         </style>
     </head>
     <body>
 <?php
 try {
+    session_start();
     set_include_path("src/");
     include_once 'keys.php';
     require_once 'Google/Client.php';
@@ -39,17 +44,62 @@ try {
 
     $client = new Google_Client();
     $client->setApplicationName("Client_Library_Examples");
-    $apiKey = YOUR_API_KEY;
-    $client->setDeveloperKey($apiKey);
+//    $client->setDeveloperKey(YOUR_API_KEY);
+    $client->setClientId(CLIENT_ID);
+    $client->setClientSecret(CLIENT_SECRET);
+    $client->setRedirectUri(REDIRECT_URI);
 
     $service = new Google_Service_Calendar($client);
+    if (isset($_GET['code'])) {
+        $client->authenticate($_GET['code']);
+        $_SESSION['token'] = $client->getAccessToken();
+        header('Location: http://' . $_SERVER['HTTP_REQUEST'] . $_SERVER['PHP_SELF']);
+    }
+
+    if (isset($_SESSION['token'])) {
+        $client->setAccessToken($_SESSION['token']);
+    }
+
+    if ($client->getAccessToken()) {
+        $calendar = $service->calendarList->listCalendarList();
+        echo '<pre>';
+        var_dump($calendar);
+        echo '</pre>';
+    }
+
+    if (!isset($_GET['code'])
+        && !isset($_SESSION['token'])
+        && !$client->getAccessToken()
+    ) {
+        $client->addScope(Google_Service_Calendar::CALENDAR);
+        header('Location:' . $client->createAuthUrl());
+    }
+    
+    
+    
+    
+//    
+//    var_dump($client->createAuthUrl());
+//    if (isset($_SESSION['oauth_access_token'])) {
+//        $client->setAccessToken($_SESSION['oauth_access_token']);
+//    } else {
+//        $token = $client->authenticate($_GET['code']);
+//        echo '<pre>';
+//        var_dump($token, $client->getAccessToken());
+//        echo '</pre>';
+//        $_SESSION['oauth_access_token'] = $client->getAccessToken();;
+//    }
+//    
 
 
-    echo '<pre>';
-    var_dump(get_class_methods($service));
-    var_dump($service);
-
-    echo '</pre>';
+//    echo '<pre>';
+////    var_dump($service->calendarList);
+////    var_dump($service->calendars);
+////    var_dump(get_class_vars('Google_Service_Calendar'));
+////    var_dump($service);
+//
+//    var_dump($service->calendarList->get(CALENDAR_ID));
+//    echo '</pre>';
 
 
 } catch (Exception $e) {
@@ -58,6 +108,7 @@ try {
 {$e->getFile()}
 {$e->getLine()}
 {$e->getMessage()}
+
 {$e->getTraceAsString()}
 </div>
 EOT;
@@ -65,3 +116,6 @@ EOT;
 ?>
     </body>
 </html>
+<?php
+ob_end_flush();
+?>
