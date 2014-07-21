@@ -53,7 +53,7 @@ try {
     if (isset($_GET['code'])) {
         $client->authenticate($_GET['code']);
         $_SESSION['token'] = $client->getAccessToken();
-        header('Location: http://' . $_SERVER['HTTP_REQUEST'] . $_SERVER['PHP_SELF']);
+        header('Location: ' . $_SERVER['SCRIPT_URI']);
     }
 
     if (isset($_SESSION['token'])) {
