@@ -64,33 +64,79 @@ try {
         $newParent  = new Google_Service_Drive_ParentReference();
 
 
-        $dirName = 'directory-' . time();
-        $directory->setTitle($dirName);
-        $directory->setMimeType('application/vnd.google-apps.folder');
-        $newDir = $service->files->insert($directory);
+//        $dirName = 'directory-' . time();
+//        $directory->setTitle($dirName);
+//        $directory->setMimeType('application/vnd.google-apps.folder');
+//        $newDir = $service->files->insert($directory);
+//
+//        $fileTitle = 'testowy-plik-' . time();
+//        $file->setFileExtension('txt');
+//        $file->setTitle($fileTitle);
+//        $newParent->setId($newDir->getId());
+//
+//        $newFile = $service->files->insert($file, [
+//            'data'          => 'lorem ipsum donor',
+//            'mimeType'      => 'text/plain',
+//            'uploadType'    => 'media',
+//        ]);
 
-        $file->setFileExtension('txt');
-        $file->setTitle('testowy-plik-' . time());
-        $newParent->setId($newDir->getId());
+//        $service->parents->insert($newFile->getId(), $newParent);
 
-        $newFile = $service->files->insert($file, [
-            'data'          => 'lorem ipsum donor',
-            'mimeType'      => 'text/plain',
-            'uploadType'    => 'media',
-        ]);
-
-        $service->parents->insert($newFile->getId(), $newParent);
-
+        $structure      = [];
+        $completeList   = $service->files->listFiles()->getItems();
+        
+        
+        
         /** @var Google_Service_Drive_DriveFile $item */
-        foreach ($service->files->listFiles()->getItems() as $item) {
-            if (preg_match('#^testowy-plik-[\d]+#', $item->getTitle())
-            || preg_match('#^directory-[\d]+#', $item->getTitle())
-            ) {
-                echo '<pre>';
-                var_dump($item->getTitle());
-                echo '</pre>';
+        foreach ($completeList as $item) {
+//            if (preg_match('#^testowy-plik-[\d]+(_[\w]+)?#', $item->getTitle())
+//            || preg_match('#^directory-[\d]+#', $item->getTitle())
+//            ) {
+            
+            $parents = $item->getParents();
+            
+            /** @var Google_Service_Drive_ParentReference $parent */
+            foreach ($parents as $parent) {
+                if ($parent->getIsRoot()) {
+                    $structure[$parent->getId()][] = [
+                        'main'      => $item->getTitle(),
+                        'id'        => $item->getId(),
+                        'mime'      => $item->getMimeType(),
+                        'childs'    => check($item->getId(), $completeList)
+                    ];
+                } else {
+//                    echo '<pre>';
+//                    var_dump($parent->getKind());
+//                    echo '</pre>';
+                }
             }
+            
+
+            
+//                echo '<pre>';
+//                var_dump($item->getId(), $item->getTitle(), $parents);
+//                echo '</pre>';
+//            }
         }
+        echo '<pre>';
+        var_dump($structure);
+        echo '</pre>';
+
+//        $copiedFile = new Google_Service_Drive_DriveFile();
+//        $copiedFile->setTitle($fileTitle . '_copy');
+//
+//        $copiedFile = $service->files->copy($newFile->getId(), $copiedFile);
+//        $service->parents->insert($copiedFile->getId(), $newParent);
+//
+//        foreach ($service->files->listFiles()->getItems() as $item) {
+//            if (preg_match('#^testowy-plik-[\d]+(_[\w]+)?#', $item->getTitle())
+//                || preg_match('#^directory-[\d]+#', $item->getTitle())
+//            ) {
+//                echo '<pre>';
+//                var_dump($item->getTitle());
+//                echo '</pre>';
+//            }
+//        }
     }
 
     if (!isset($_GET['code'])
@@ -114,6 +160,38 @@ try {
 </div>
 EOT;
 }
+
+function check($id, $completeList)
+{
+    $sublist = [];
+    /** @var Google_Service_Drive_DriveFile $item */
+    foreach ($completeList as $item) {
+
+        $parents = $item->getParents();
+
+        if (isset($parents[0])) {
+            /** @var Google_Service_Drive_ParentReference $father */
+            $father = $parents[0];
+            if ($father->getId() === $id) {
+                $sublist[$father->getId()][] = [
+                    'main'      => $item->getTitle(),
+                    'childs'    => check($item->getId(), $completeList),
+                    'id'        => $item->getId(),
+                    'mime'      => $item->getMimeType(),
+                ];
+            }
+            
+            //$structure[$father->getId()]['files'][] = $item->getTitle();
+        }
+    }
+
+    if (empty($sublist)) {
+        return null;
+    }
+    return $sublist;
+}
+
+
 ?>
     </body>
 </html>
