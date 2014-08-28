@@ -58,18 +58,38 @@ try {
     }
 
     if ($client->getAccessToken()) {
-        $service = new Google_Service_Drive($client);
-        $file = new Google_Service_Drive_DriveFile();
-        $file->setFileExtension('.txt');
-        $file->setTitle('testowy-plik2');
+        $service    = new Google_Service_Drive($client);
+        $file       = new Google_Service_Drive_DriveFile();
+        $directory  = new Google_Service_Drive_DriveFile();
+        $newParent  = new Google_Service_Drive_ParentReference();
 
-        $service->files->insert($file);
+
+        $dirName = 'directory-' . time();
+        $directory->setTitle($dirName);
+        $directory->setMimeType('application/vnd.google-apps.folder');
+        $newDir = $service->files->insert($directory);
+
+        $file->setFileExtension('txt');
+        $file->setTitle('testowy-plik-' . time());
+        $newParent->setId($newDir->getId());
+
+        $newFile = $service->files->insert($file, [
+            'data'          => 'lorem ipsum donor',
+            'mimeType'      => 'text/plain',
+            'uploadType'    => 'media',
+        ]);
+
+        $service->parents->insert($newFile->getId(), $newParent);
 
         /** @var Google_Service_Drive_DriveFile $item */
         foreach ($service->files->listFiles()->getItems() as $item) {
-            echo '<pre>';
-            var_dump($item->getTitle());
-            echo '</pre>';
+            if (preg_match('#^testowy-plik-[\d]+#', $item->getTitle())
+            || preg_match('#^directory-[\d]+#', $item->getTitle())
+            ) {
+                echo '<pre>';
+                var_dump($item->getTitle());
+                echo '</pre>';
+            }
         }
     }
 
