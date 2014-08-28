@@ -1,8 +1,8 @@
 <?php
 ob_start();
 ?>
-<!DOCTYPE html>
-<html>
+    <!DOCTYPE html>
+    <html>
     <head>
         <meta charset="utf-8">
         <style>
@@ -44,7 +44,6 @@ try {
 
     $client = new Google_Client();
     $client->setApplicationName("Client_Library_Examples");
-//    $client->setDeveloperKey(YOUR_API_KEY);
     $client->setClientId(CLIENT_ID);
     $client->setClientSecret(CLIENT_SECRET);
     $client->setRedirectUri(REDIRECT_URI);
@@ -62,9 +61,20 @@ try {
 
     if ($client->getAccessToken()) {
         $calendar = $service->calendarList->listCalendarList();
-        echo '<pre>';
-        var_dump($calendar);
-        echo '</pre>';
+
+        while(true) {
+            foreach ($calendar->getItems() as $calendarListEntry) {
+                echo $calendarListEntry->getSummary();
+                echo '<br/>';
+            }
+            $pageToken = $calendar->getNextPageToken();
+            if ($pageToken) {
+                $optParams = array('pageToken' => $pageToken);
+                $calendar = $service->calendarList->listCalendarList($optParams);
+            } else {
+                break;
+            }
+        }
     }
 
     if (!isset($_GET['code'])
@@ -74,8 +84,6 @@ try {
         $client->addScope(Google_Service_Calendar::CALENDAR);
         header('Location:' . $client->createAuthUrl());
     }
-    
-    
 
 
 
