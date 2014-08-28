@@ -39,8 +39,7 @@ try {
     session_start();
     set_include_path("src/");
     include_once 'keys.php';
-    require_once 'Google/Client.php';
-    require_once 'Google/Service/Calendar.php';
+    require_once 'vendor/autoload.php';
 
     $client = new Google_Client();
     $client->setApplicationName("Client_Library_Examples");
@@ -48,7 +47,6 @@ try {
     $client->setClientSecret(CLIENT_SECRET);
     $client->setRedirectUri(REDIRECT_URI);
 
-    $service = new Google_Service_Calendar($client);
     if (isset($_GET['code'])) {
         $client->authenticate($_GET['code']);
         $_SESSION['token'] = $client->getAccessToken();
@@ -60,20 +58,18 @@ try {
     }
 
     if ($client->getAccessToken()) {
-        $calendar = $service->calendarList->listCalendarList();
+        $service = new Google_Service_Drive($client);
+        $file = new Google_Service_Drive_DriveFile();
+        $file->setFileExtension('.txt');
+        $file->setTitle('testowy-plik2');
 
-        while(true) {
-            foreach ($calendar->getItems() as $calendarListEntry) {
-                echo $calendarListEntry->getSummary();
-                echo '<br/>';
-            }
-            $pageToken = $calendar->getNextPageToken();
-            if ($pageToken) {
-                $optParams = array('pageToken' => $pageToken);
-                $calendar = $service->calendarList->listCalendarList($optParams);
-            } else {
-                break;
-            }
+        $service->files->insert($file);
+
+        /** @var Google_Service_Drive_DriveFile $item */
+        foreach ($service->files->listFiles()->getItems() as $item) {
+            echo '<pre>';
+            var_dump($item->getTitle());
+            echo '</pre>';
         }
     }
 
@@ -81,7 +77,7 @@ try {
         && !isset($_SESSION['token'])
         && !$client->getAccessToken()
     ) {
-        $client->addScope(Google_Service_Calendar::CALENDAR);
+        $client->addScope(Google_Service_Drive::DRIVE);
         header('Location:' . $client->createAuthUrl());
     }
 
